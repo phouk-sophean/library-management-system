@@ -33,3 +33,4 @@ Route::group(['prefix' => 'v1', 'namespace' => 'App\Http\Controllers\Api\V1'], f
 
 Route::get('CategoryBooks',[CategoryController::class,'getCategoriesWithBooks']);
 Route::get('BookCategory', [BookController::class, 'getBooksWithCategory']);
+Route::get('MemberBorrowings', [MemberController::class, 'getMemberWithBorrowings']);
