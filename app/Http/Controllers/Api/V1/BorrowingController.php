@@ -13,8 +13,11 @@ class BorrowingController extends Controller
      */
     public function index()
     {
-       $borrow = Borrowing::all();
-        return response()->json($borrow, 200); 
+        $borrow = Borrowing::all();
+        return response()->json([
+            'Status' => 'successfully',
+            'Data' => $borrow
+        ]);
     }
 
     /**
@@ -23,19 +26,20 @@ class BorrowingController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'user_id' => 'required|exists:users,id',
+            'member_id' => 'required|exists:members,id',
             'book_id' => 'required|exists:books,id',
-            'borrowed_at' => 'required|date',
-            'due_date' => 'required|date|after_or_equal:borrowed_at',
+            'borrow_date' => 'required|date',
+            'return_date' => 'required|date|after_or_equal:borrow_date',
         ]);
 
         $borrowing = Borrowing::create($validated);
 
         return response()->json([
-            'message' => 'Borrowing created successfully',
-            'data' => $borrowing,
+            'message' => 'Book borrowed successfully',
+            'data' => $borrowing
         ], 201);
     }
+
 
     /**
      * Display the specified resource.
@@ -60,7 +64,7 @@ class BorrowingController extends Controller
     {
         //
     }
-         public function getMemberWithBorrowings()
+    public function getMemberWithBorrowings()
     {
         $borrows = Borrowing::with('')->get();
 
