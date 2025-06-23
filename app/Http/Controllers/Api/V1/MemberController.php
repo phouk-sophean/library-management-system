@@ -52,7 +52,19 @@ class MemberController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $member = Member::find($id);
+
+        if (!$member) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Member not found'
+            ], 404);
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $member
+        ], 200);
     }
 
     /**
@@ -60,7 +72,27 @@ class MemberController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $member = Member::find($id);
+
+        if (!$member) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Member not found'
+            ], 404);
+        }
+
+        $validated = $request->validate([
+            'name' => 'sometimes|required|string|max:255',
+            'email' => 'sometimes|required|email|unique:members,email,' . $id,
+            'phone' => 'nullable|string|max:15',
+        ]);
+
+        $member->update($validated);
+
+        return response()->json([
+            'message' => 'Member updated successfully',
+            'data' => $member,
+        ], 200);
     }
 
     /**
@@ -68,7 +100,20 @@ class MemberController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $member = Member::find($id);
+
+        if (!$member) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Member not found'
+            ], 404);
+        }
+
+        $member->delete();
+
+        return response()->json([
+            'message' => 'Member deleted successfully'
+        ], 200);
     }
 
     public function getMemberWithBorrowings()
