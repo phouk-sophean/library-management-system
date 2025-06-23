@@ -3,8 +3,6 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
-use App\Models\Category;
-use Faker\Calculator\Isbn;
 use Illuminate\Http\Request;
 
 // model 
