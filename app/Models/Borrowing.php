@@ -10,7 +10,13 @@ use App\Models\Book;
 class Borrowing extends Model
 {
     use HasFactory;
-
+    protected $fillable = [
+        'member_id',
+        'book_id',
+        'borrowed_at',
+        'due_date',
+        'returned_at',
+    ];
     public function member() 
     {
         return $this -> belongsTo(Member::class);

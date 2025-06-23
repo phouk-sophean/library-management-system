@@ -10,6 +10,7 @@ use App\Models\Book;
 class Category extends Model
 {
     use HasFactory;
+    
 
     public function books()
     {
