@@ -15,7 +15,7 @@ class CategoryController extends Controller
      */
     public function index()
     {
-        $categories = Category::all();
+        $categories = Category::with('books')->get();
         return response()->json([
             'Status' => 'Success',
             'Data' => $categories
@@ -28,27 +28,26 @@ class CategoryController extends Controller
      */
     public function store(Request $request)
     {
-        // ✅ Validate inputs
         $validated = $request->validate([
-            'name' => 'required|unique:categories',
-            'books' => 'array|nullable',
-            'books.*' => 'exists:books,id ',
+            'name' => 'required|string|max:255',
+            'desc' => 'nullable|string',
+            'image' => 'nullable|image|max:2048',
         ]);
 
-        // ✅ Create the category
-        $category = Category::create([
-            'name' => $validated['name'],
-        ]);
-
-        // ✅ Attach books if provided
-        if (!empty($validated['books'])) {
-            $category->books()->attach($validated['books']);
+        $path = null;
+        if ($request->hasFile('image')) {
+            $path = $request->file('image')->store('categories', 'public');
         }
 
-        // ✅ Return with attached books
+        $category = Category::create([
+            'name' => $validated['name'],
+            'desc' => $validated['desc'] ?? null,
+            'image' => $path ? asset('storage/' . $path) : null,
+        ]);
+
         return response()->json([
-            'message' => 'Category created successfully',
-            'data' => $category->load('books'),
+            'status' => 'success',
+            'Data' => $category
         ], 201);
     }
 
@@ -90,7 +89,7 @@ class CategoryController extends Controller
 
         // update 
         $category->update([
-            'name' => $validated['name']
+            'name' => $validated['name'],
         ]);
 
         // sync books (remove old and attach new)
@@ -129,13 +128,13 @@ class CategoryController extends Controller
     /**
      * Show all related
      */
-    public function getCategoriesWithBooks()
-    {
-        $categories = Category::with('books')->get();
+    // public function getCategoriesWithBooks()
+    // {
+    //     $categories = Category::with('books')->get();
 
-        return response()->json([
-            'status' => 'success',
-            'data' => $categories
-        ], 200);
-    }
+    //     return response()->json([
+    //         'status' => 'success',
+    //         'data' => $categories
+    //     ], 200);
+    // }
 }

@@ -15,11 +15,11 @@ class BookController extends Controller
      */
     public function index()
     {
-        $book = Book::all();
-        
+        $books = Book::with('categories')->get();
+
         return response()->json([
             'Status' => 'successfully',
-            'Data' => $book
+            'Data' => $books
         ]);
     }
 
@@ -49,7 +49,7 @@ class BookController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'data' => $book->load('categories') // eager load categories
+            'Data' => $book->load('categories') // eager load categories
         ], 201);
     }
 
@@ -110,7 +110,7 @@ class BookController extends Controller
         // Return response with updated book and categories
         return response()->json([
             'message' => 'Book updated successfully',
-            'data' => $book->load('categories'),
+            'Data' => $book->load('categories'),
         ], 200);
     }
 
@@ -127,7 +127,7 @@ class BookController extends Controller
         $book->categories()->detach();
 
         // delete 
-        $book -> delete();
+        $book->delete();
 
         // return 
         return response()->json([
@@ -135,12 +135,14 @@ class BookController extends Controller
         ], 200);
     }
 
-    public function getBooksWithCategory()
-    {
-        $book = Book::with('categories')->get();
-        return response()->json([
-            'Status' => 'Success',
-            'Data' => $book
-        ], 200);
-    }
+    // public function getBooksWithCategory()
+    // {
+    //     $books = Book::with('categories')->get();
+
+    //     return response()->json([
+    //         'Status' => 'Success',
+    //         'Data' => $books
+    //     ], 200);
+    // }
+
 }
