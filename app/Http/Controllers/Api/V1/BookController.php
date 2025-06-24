@@ -1,9 +1,12 @@
 <?php
 
 namespace App\Http\Controllers\Api\V1;
+use Illuminate\Http\Request;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
+use App\Http\Requests\UpdateBookRequest;
+use App\Http\Requests\StoreBookRequest;
+
 
 // model 
 use App\Models\Book;
@@ -16,7 +19,7 @@ class BookController extends Controller
     public function index()
     {
         $book = Book::all();
-        
+
         return response()->json([
             'Status' => 'successfully',
             'Data' => $book
@@ -26,26 +29,15 @@ class BookController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreBookRequest $request)
     {
-        $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'author' => 'required|string|max:255',
-            'isbn' => 'required|string|unique:books,isbn',
-            'copies' => 'required|integer|min:1',
-            'category_ids' => 'array',
-            'category_ids.*' => 'exists:categories,id',
-        ]);
+        // Find the book or fail
 
-        $book = Book::create([
-            'title' => $validated['title'],
-            'author' => $validated['author'],
-            'isbn' => $validated['isbn'],
-            'copies' => $validated['copies'],
-        ]);
+        // Validate input
+        $validated = $request->validated();
 
-        // attach category if provided
-        $book->categories()->attach($validated['category_ids']);
+        //Store book all
+        $book = Book::create($validated);
 
         return response()->json([
             'status' => 'success',
@@ -79,33 +71,15 @@ class BookController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(UpdateBookRequest $request, string $id)
     {
         // Find the book or fail
         $book = Book::findOrFail($id);
 
         // Validate input
-        $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'author' => 'required|string|max:255',
-            'isbn' => 'required|string|unique:books,isbn,' . $id,
-            'copies' => 'required|integer|min:1',
-            'category_ids' => 'array|nullable',
-            'category_ids.*' => 'exists:categories,id',
-        ]);
-
-        // Update book fields
-        $book->update([
-            'title' => $validated['title'],
-            'author' => $validated['author'],
-            'isbn' => $validated['isbn'],
-            'copies' => $validated['copies'],
-        ]);
-
-        // Sync categories if provided
-        if (!empty($validated['category_ids'])) {
-            $book->categories()->sync($validated['category_ids']);
-        }
+        $validated = $request->validated();
+        // Update book with validated data
+        $book->update($validated);
 
         // Return response with updated book and categories
         return response()->json([
@@ -127,7 +101,7 @@ class BookController extends Controller
         $book->categories()->detach();
 
         // delete 
-        $book -> delete();
+        $book->delete();
 
         // return 
         return response()->json([

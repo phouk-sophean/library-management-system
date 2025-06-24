@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Member;
+use App\Http\Requests\StoreMemberRequest;
+use App\Http\Requests\UpdateMemberRequest;
 
 class MemberController extends Controller
 {
@@ -31,13 +33,10 @@ class MemberController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreMemberRequest $request)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:members,email',
-            'phone' => 'nullable|string|max:15',
-        ]);
+       
+        $validated = $request->validated();
 
         $member = Member::create($validated);
 
@@ -70,9 +69,9 @@ class MemberController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(UpdateMemberRequest $request, string $id)
     {
-        $member = Member::find($id);
+        $member = Member::findOrFail($id);
 
         if (!$member) {
             return response()->json([
@@ -81,11 +80,8 @@ class MemberController extends Controller
             ], 404);
         }
 
-        $validated = $request->validate([
-            'name' => 'sometimes|required|string|max:255',
-            'email' => 'sometimes|required|email|unique:members,email,' . $id,
-            'phone' => 'nullable|string|max:15',
-        ]);
+       $validated = $request->validated();
+       
 
         $member->update($validated);
 

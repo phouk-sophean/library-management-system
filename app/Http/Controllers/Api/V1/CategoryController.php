@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use App\Http\Requests\StoreCategoryRequest;
+use App\Http\Requests\UpdateCategoryRequest;
 
 // model
 use App\Models\Category;
@@ -26,26 +28,13 @@ class CategoryController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreCategoryRequest $request)
     {
-        // ✅ Validate inputs
-        $validated = $request->validate([
-            'name' => 'required|unique:categories',
-            'books' => 'array|nullable',
-            'books.*' => 'exists:books,id ',
-        ]);
-
-        // ✅ Create the category
-        $category = Category::create([
-            'name' => $validated['name'],
-        ]);
-
-        // ✅ Attach books if provided
-        if (!empty($validated['books'])) {
-            $category->books()->attach($validated['books']);
-        }
-
-        // ✅ Return with attached books
+       
+         $validated = $request->validated();
+        
+        $category = Category::create($validated);
+        
         return response()->json([
             'message' => 'Category created successfully',
             'data' => $category->load('books'),
@@ -58,6 +47,8 @@ class CategoryController extends Controller
     public function show(string $id)
     {
         $category = Category::find($id);
+
+        $category = Category::create($category);
 
         // Condition check
         if (!$category) {
@@ -76,17 +67,13 @@ class CategoryController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(UpdateCategoryRequest $request, string $id)
     {
         // Find id specified
-        $category = Category::find($id);
+        $category = Category::findOrFail($id);
 
         // validate input
-        $validated = $request->validate([
-            'name' => 'required|unique:categories,name,' . $id, // allow the same name if no change
-            'books' => 'array|nullable',
-            'books.*' => 'exists:books,id',
-        ]);
+        $validated = $request->validated();
 
         // update 
         $category->update([
