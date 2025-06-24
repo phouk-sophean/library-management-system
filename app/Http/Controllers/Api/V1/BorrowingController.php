@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-
+use App\Http\Requests\StoreBorrowRequest;
+use App\Http\Requests\UpdateBorrowRequest;
 use App\Models\Borrowing;
 
 class BorrowingController extends Controller
@@ -16,23 +16,19 @@ class BorrowingController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'data' => $borrowings
+            'data' => $borrowings,
         ]);
     }
 
     // Create a new borrowing record
-    public function store(Request $request)
+    public function store(StoreBorrowRequest $request)
     {
-        $validated = $request->validate([
-            'member_id' => 'required|exists:members,id',
-            'book_id' => 'required|exists:books,id',
-            'borrow_date' => 'required|date',
-            'return_date' => 'required|date|after_or_equal:borrow_date',
-        ]);
-
+        $validated = $request->validated();
+        
         $borrowing = Borrowing::create($validated);
 
         return response()->json([
+            'status' => 'success',
             'message' => 'Borrowing created successfully',
             'data' => $borrowing->load(['book', 'member']),
         ], 201);
@@ -57,25 +53,21 @@ class BorrowingController extends Controller
     }
 
     // Update a borrowing record
-    public function update(Request $request, $id)
+    public function update(UpdateBorrowRequest $request, $id)
     {
+        // Find the borrowing or fail
         $borrowing = Borrowing::findOrFail($id);
 
-        $validated = $request->validate([
-            'member_id' => 'required|exists:members,id',
-            'book_id' => 'required|exists:books,id',
-            'borrow_date' => 'required|date',
-            'return_date' => 'required|date|after_or_equal:borrow_date',
-        ]);
+        $validated = $request->validated();
 
         $borrowing->update($validated);
 
         return response()->json([
+            'status' => 'success',
             'message' => 'Borrowing updated successfully',
             'data' => $borrowing->load(['book', 'member']),
-        ], 200);
+        ]);
     }
-
 
     // Delete a borrowing record
     public function destroy($id)
@@ -92,6 +84,7 @@ class BorrowingController extends Controller
         $borrowing->delete();
 
         return response()->json([
+            'status' => 'success',
             'message' => 'Borrowing deleted successfully',
         ]);
     }

@@ -21,4 +21,16 @@ class Book extends Model
         return $this->belongsToMany(Category::class, 'book__category')->withTimestamps();
     }
     protected $fillable = ['title', 'author', 'isbn', 'copies'];
+
+    // create attribute to clean date formate
+    public function getCreatedAtAttribute($value) {
+        return date('d-m-Y', strtotime($value));
+    }
+
+    // create attribute to clean date formate
+    public function getUpdatedAtAttribute($value) {
+        return date('F d, Y', strtotime($value));
+    }
+   
+   
 }
